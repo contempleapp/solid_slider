@@ -1,20 +1,6 @@
-## A look into solidjs components
-
-SolidJS is a modern JavaScript library designed to make building web applications easier, faster, and more enjoyable.
-
-With SolidJS, you can create robust, maintainable, and scalable web apps. The library is designed to be highly customizable, 
-
-Some of the key benefits of using SolidJS include:
-
-* SolidJS is optimized for performance, providing fast rendering and efficient updates.
-* SolidJS has a growing ecosystem of plugins, tools, and integrations with other popular libraries and frameworks.
-
- Let's get started!
+### A slider component in SolidJS
 
 [solidjs.com](https://solidjs.com)
-
-
-### A slider component in SolidJS
 
 There are a lot of good ui libraries for solidjs like [kobalte.dev](https://kobalte.dev), [suid.io](https://suid.io) or [ark-ui.com](https://ark-ui.com). There are some very advanced Sliders, but i want to write a few ui components for my [tauri.app](https://tauri.app) app and a Slider is a needed base component for other components like a Color Picker component etc.
 
