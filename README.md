@@ -2,7 +2,7 @@
 
 There are a lot of good ui libraries for solidjs like [kobalte.dev](https://kobalte.dev), [suid.io](https://suid.io) or [ark-ui.com](https://ark-ui.com). There are some very advanced Sliders, but i want to write a few ui components for my [tauri.app](https://tauri.app) app and a Slider is a needed base component for other components like a Color Picker component etc.
 
-# Let's get started with a new SolidJS project
+### Let's get started with a new SolidJS project
 
 Open Terminal app and run
 
