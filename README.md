@@ -1,188 +1,382 @@
+
 ### A slider component in [solidjs.com](https://solidjs.com)
 
-There are a lot of good ui libraries for solidjs like [kobalte.dev](https://kobalte.dev), [suid.io](https://suid.io) or [ark-ui.com](https://ark-ui.com). There are some very advanced Sliders, but i want to write a few ui components for my [tauri.app](https://tauri.app) app and a Slider is a needed base component for other components like a Color Picker component etc.
+#### PART TWO
 
-### Let's get started with a new SolidJS project
+The first version of the slider had various problems and should not be used to learn SolidJS. Since i'am also just learning SolidJS, i didn't notice the problems with the Slider in my app, but there are problems with the not reactive `props`. Also some problems with the `step`, `offset` and `value` props. I should have tested the component better before writing a tutorial about SolidJS. I apologize.
 
-Open Terminal app and run
+#### Here you find an updated verison of the slider:
 
-```
-npm create vite@latest
-```
+- The props are now initialized in every function when needed. This makes the component props reactive with Signals.
+- There were problems with the value calculation, and resize handling
+- Renamed `minValue` and `maxValue` to `min` and `max`, `onChangeEnd` to `onEnd` and added a `onStart` callback function
+- I also added a global `index.css` file for styling and changed some of the style sheets
 
-The command will ask some questions, select Solid from the list using the cursor keys, Typescript is not required for this project, select Javascript
-
-Still in the Terminal, change the directory to the new folder created:
-```
-cd my-ui-library
-```
-
-Inside the directory run the install command to setup the vite project:
-```
-npm install
-```
-
-Create a `components` folder inside the `src` directory:
-
-In the components directory, create two files: `slider.css` and `Slider.jsx`.
-
-`components/slider.css`:
 ```css
-.ui_slider {
-    width: 100%;
-    height: 24px;
-    position: relative;
+body {
+	background: #CFCFCF;
+}
+body, div, button, p, span {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+.main {
+	margin: 32px;
+	padding: 16px;
+	border-radius: 12px;
+	background: #F2F2F2;
+	color: #222;
+}
+
+.slider_label {
+	display: block;
+	padding: 12px 4px;
 }
 
 .output {
     font-size: 16px;
-    color: #333;
+    color: inherit;
     text-align: right;
-    margin-right: 12px;
+    margin: 12px;
+}
+
+.demo_slider_wrap {
+	background-color: #ada;
+	border-radius: 12px;
+	padding: 24px;
+	margin: 16px;
+}
+
+.demo_slider {
+	margin-bottom: 32px;
+}
+.demo_slider .ui_slider_track {
+	background: #ccffcc;
+	border: 2px solid #141;
+	border-radius: 16px;
+	height: 38px;
+	padding: 0px;
+}
+.demo_slider .ui_slider_button {
+	background: #252;
+	width: 20px;
+	height: 28px;
+	top: 5px;
+	border-radius: 14px;
+}
+
+@media (prefers-color-scheme: dark) {
+	body {
+		background: #181818;
+	}
+	.main {
+		background: #212121;
+		color: #DDD;
+	}
+	.demo_slider_wrap {
+		background-color: #224422;
+	}
+	.demo_slider .ui_slider_track {
+		background: #020;
+	}
+}
+```
+
+The styles react to the operating system dark mode settings. IF you don't want this, remove the `@media` block.
+Here are some general styles and also a unique styling for the demo slider: `demo_slider`. The css class name is then used as a component prop later.
+
+I created a new example project with a lot of Sliders to test the features
+
+```jsx
+import { createSignal } from "solid-js";
+import Slider from "./components/Slider";
+import "./index.css";
+
+function App() {
+  const [sliderValue, setSliderValue] = createSignal(50);
+  const [slider2Value, setSlider2Value] = createSignal(50);
+  const [sliderMinValue, setSliderMinValue] = createSignal(0);
+  const [sliderMaxValue, setSliderMaxValue] = createSignal(100);
+  const [sliderOffsetValue, setSliderOffsetValue] = createSignal(0);
+  const [sliderStepValue, setSliderStepValue] = createSignal(0);
+  let theSlider, linkSlider, minSlider, maxSlider, offsetSlider, stepSlider;
+
+  function sliderChange (val, track, btn) {
+      setSliderValue(val.value);
+  }
+  function sliderStart (val, track, btn) {
+      console.log("Slider clicked at " + val.value);
+  }
+  function sliderEnd (val, track, btn) {
+      console.log("Slider released at " + val.value);
+  }
+  function slider2Change (val, track, btn) {
+      setSlider2Value(val.value);
+  }
+  function sliderMinChange (val, track, btn) {
+     setSliderMinValue(val.value);
+  }
+  function sliderMaxChange (val, track, btn) {
+     setSliderMaxValue(val.value);
+  }
+  function sliderOffsetChange (val, track, btn) {
+     setSliderOffsetValue(val.value);
+  }
+  function sliderStepChange (val, track, btn) {
+     setSliderStepValue(val.value);
+  }
+  const setButtonValue = () => {
+      setSliderValue(43);
+  }
+
+  return (
+    <div class="main">
+        <h2>SolidJS Slider Component</h2>
+
+        <label class="slider_label">Min:</label>
+        <Slider ref={minSlider}
+                defaultValue={sliderMinValue()}
+                min={250}
+                max={-250}
+                step={10}
+                onChange={sliderMinChange}
+        />
+        <p class="output">{sliderMinValue()}</p>
+
+        <label class="slider_label">Max:</label>
+        <Slider ref={maxSlider}
+                defaultValue={sliderMaxValue()}
+                min={-250}
+                max={250}
+                step={10}
+                onChange={sliderMaxChange}
+        />
+        <p class="output">{sliderMaxValue()}</p>
+
+        <label class="slider_label">Offset:</label>
+        <Slider ref={offsetSlider}
+                defaultValue={sliderOffsetValue()}
+                min={0}
+                max={25}
+                step={1}
+                onChange={sliderOffsetChange}
+        />
+        <p class="output">{sliderOffsetValue()}</p>
+
+        <label class="slider_label">Step:</label>
+        <Slider ref={stepSlider}
+                defaultValue={sliderStepValue()}
+                min={0}
+                max={25}
+                step={1}
+                onChange={sliderStepChange}
+        />
+        <p class="output">{sliderStepValue()}</p>
+
+        <div class="demo_slider_wrap">
+            <label class="slider_label">Demo Slider:</label>
+            <Slider ref={theSlider}
+                    cssClass="demo_slider"
+                    defaultValue={sliderValue()}
+                    min={sliderMinValue()}
+                    max={sliderMaxValue()}
+                    offset={sliderOffsetValue()}
+                    step={sliderStepValue()}
+                    onChange={sliderChange}
+                    onStart={sliderStart} 
+                    onEnd={sliderEnd} 
+            />
+            <p class="output">{sliderValue().toFixed(4)}</p>
+          </div>
+
+        <label class="slider_label">Linked Slider:</label>
+        <Slider ref={linkSlider}
+                min={sliderMinValue()}
+                max={sliderMaxValue()}
+                offset={sliderOffsetValue()}
+                step={sliderStepValue()}
+                value={sliderValue()}
+                onChange={slider2Change}
+        />
+        <p class="output">{slider2Value().toFixed(4)}</p>
+        <button onClick={setButtonValue}>Set Slider Value To 43</button>
+    </div>
+  )
+}
+
+export default App;
+
+```
+
+Here are a few Sliders wich control the Demo Slider.
+
+`components/slider.css`
+```css
+.ui_slider {
+    width: 100%;
+    height: 18px;
+    position: relative;
 }
 
 .ui_slider_track {
-    box-sizing: border-box;
-    background: #dfdfdf;
-    border: 1px solid #666;
-    height: 18px;
+    background: #EEE;
+    border: 1px solid #AAA;
+    height: 20px;
     width: 100%;
-    border-radius: 9px;
-    padding: 2px;
+    border-radius: 10px;
+    padding: 0px;
 }
 
 .ui_slider_button {
-    box-sizing: border-box;
     outline: none;
     border: none;
     background-color: #44F;
     display: block;
     position: absolute;
-    left: 2px;
+    left: 0px;
     top: 2px;
-    height: 14px;
+    height: 16px;
+    width: 48px;
+    border-radius: 8px;
     font-size: 8px;
-    width: 32px;
-    border-radius: 6px;
 }
 
 @media (prefers-color-scheme: dark) {
-    .ui_slider p {
-        color: #DDD;
-    }
     .ui_slider_track {
-        background: #222;
+        background: #282828;
         border: 1px solid #1c1c1c;
     }
 }
 ```
 
-The slider is either light or dark, depending on the setting of the operating system. I also prefixed all class names with `ui_` to avoid css naming conflicts.
-
-`components/Slider.jsx`
-
+And `components/Slider.jsx`
 ```jsx
-import { onMount, onCleanup } from "solid-js";
+import { onMount, onCleanup, createEffect } from "solid-js";
 import "./slider.css";
-/**
+/** 
  * Props:
+ * cssClass: String
  * defaultValue: Number
- * minValue: Number
- * maxValue: Number
+ * min Number
+ * max: Number
  * step: Number
  * offset: Number
- * onChange: Function
- * onChangeEnd: Function
+ * value: Number
+ * onChange: Function( currentValue, track_ref, button_ref)
+ * onStart: Function( currentValue, track_ref, button_ref )
+ * onEnd: Function( currentValue, track_ref, button_ref )
+ * *** Note: currentValue is an object with the 'value' property
  */
 function Slider (props) {
-    const min = parseFloat(props.minValue || 0);
-    const max = parseFloat(props.maxValue || 100);
-    const step = parseFloat(props.step || 1);
-    const offset = parseFloat(props.offset || 0);
-    const onChange = props.onChange || null;
-    const onChangeEnd = props.onChangeEnd || null;
-    const sliderPos = { clickPos: 0, btnStartPos: 0, currValue: 0 };
+    const sliderPos = { clickPos: 0, btnStartPos: 0, value: 0 };
     let btn, track;
 
     onMount(() => {
-        const size = (track.clientWidth - btn.clientWidth) - offset * 2;
+        const offset = props.offset || 0;
+        const size = track.clientWidth - (btn.clientWidth + (offset * 2));
         const percent = getPercentValue(props.defaultValue || 0);
-        sliderPos.currValue = props.defaultValue || 0;
-        btn.style.left = (size * percent + offset) + "px";
-        window.addEventListener("resize", windowResize);
+        sliderPos.value = props.defaultValue || 0;
+        btn.style.left = ((size * percent) + offset) + "px";
+        window.addEventListener("resize", resize);
+    });
+    onCleanup(() => window.removeEventListener("resize", resize));
+
+    createEffect(() => {
+        if(typeof props.value !== "undefined" && props.value !== sliderPos.value) {
+            updateValue(props.value);
+        }
     });
 
-    onCleanup(() => {
-        window.removeEventListener("resize", windowResize);
-    });
-
-    function windowResize (e) {
-        const size = (track.clientWidth - btn.clientWidth) - offset * 2;
-        const percent = getPercentValue(sliderPos.currValue);
+    function resize (e) {
+        const offset = props.offset || 0;
+        const size = track.clientWidth - (btn.clientWidth + (offset * 2));
+        const percent = getPercentValue(sliderPos.value);
         btn.style.left = (size * percent + offset) + "px";
     }
 
     function getPercentValue (v) {
-        let val = parseFloat(v);
-        let p, percent;
-        if( max > min) {
-            if(val < min) val = min;
-            else if(val > max) val = max;
-            p = val - min;
-            percent = p/(max-min);
-        }else{
-            if(val < max) val = max;
-            else if(val > min) val = min;
-            p = val - max;
-            percent = 1-(p/(min-max));
-        }
-        return percent;
+        const min = props.min || 0;
+        const max = typeof props.max == "number" ? props.max : 100;
+        const val = inRange(min, max, parseFloat(v));
+        if(max > min) return (val-min)/(max-min);
+        else return 1 - ((val-max) / (min-max));
     }
 
     function getBtnPercentValue (btn_pos) {
-        const size = (track.clientWidth - btn.clientWidth) - offset * 2;
-        return (btn_pos - offset)/size;
+        const offset = props.offset || 0;
+        const size = track.clientWidth - (btn.clientWidth + (offset * 2));
+        return (btn_pos - offset) / size;
     }
 
     function sliderUp (event) {
-        window.document.removeEventListener("mouseup", sliderUp);
-        window.document.removeEventListener("mousemove", sliderMove);
-        if(typeof onChangeEnd === "function") {
-            const pos = parseFloat(btn.style.left);
-            const percent = getBtnPercentValue(pos);
-            const newval = min + (max - min) * percent;
-            onChangeEnd(newval, track, btn);
-        }
+        window.removeEventListener("mouseup", sliderUp);
+        window.removeEventListener("mousemove", sliderMove);
+        if(typeof props.onEnd === "function") 
+            props.onEnd(sliderPos.value, track, btn);
     }
 
     function sliderMove (event) {
         const dx = Number(event.clientX) - sliderPos.clickPos;
+        const step = props.step || 0;
+        const offset = props.offset || 0;
+        const min = props.min || 0;
+        const max = typeof props.max == "number" ? props.max : 100;
+        const size = track.clientWidth - (btn.clientWidth + (offset * 2));
         let pos = Math.round(dx) + sliderPos.btnStartPos;
         
         if(pos < offset) pos = offset;
-        else if(pos > track.clientWidth - (btn.clientWidth + offset)) 
-            pos = track.clientWidth - (btn.clientWidth + offset);
-        
-        if(step !== 1) {
-            const vs = (track.clientWidth-(btn.clientWidth + offset)) / max * step;
-            pos = Math.round(pos / vs ) * vs;
+        else if(pos > size + offset) pos = size + offset;
+        else if(step !== 0) {
+            const vs = (size/ (max - min)) * step;
+            pos = Math.round((pos - offset*2) / vs) * vs + offset;
+            if(pos < offset) pos = offset;
+            else if(pos > size + offset) pos = size + offset;
         }
 
         btn.style.left = pos + "px";
 
-        if(typeof onChange === "function") {
-            const percent = getBtnPercentValue(pos);
-            const newval = min + (max - min) * percent;
-            sliderPos.currValue = newval;
-            onChange(newval, track, btn);
-        }
+        const percent = getBtnPercentValue(pos);
+        const newval = (max - min) * percent + min;
+        sliderPos.value = newval;
+        
+        if(typeof props.onChange === "function") 
+            props.onChange(sliderPos, track, btn);
     }
 
     function sliderDown (event) {
-        window.document.addEventListener("mouseup", sliderUp);
-        window.document.addEventListener("mousemove", sliderMove);
+        window.addEventListener("mouseup", sliderUp);
+        window.addEventListener("mousemove", sliderMove);
         sliderPos.clickPos = Number(event.clientX);
         sliderPos.btnStartPos = parseInt(btn.style.left) || 0;
+        if(typeof props.onStart === "function") 
+            props.onStart(sliderPos, track, btn);
+    }
+
+    function updateValue (val) {
+        const min = props.min || 0;
+        const max = typeof props.max == "number" ? props.max : 100;
+        const offset = typeof props.offset === "number" ? props.offset : 0;
+        val = inRange(min, max, val)
+        const size = track.clientWidth - (btn.clientWidth + (offset * 2));
+        const percent = getPercentValue(val);
+        sliderPos.value = val;
+
+        btn.style.left = (size * percent + offset) + "px";
+
+        if(typeof props.onChange === "function")
+            props.onChange(sliderPos, track, btn);
+    }
+
+    function inRange (min, max, val) {
+        if( max > min) {
+            if(val < min) val = min;
+            else if(val > max) val = max;
+        }else{
+            if(val < max) val = max;
+            else if(val > min) val = min;
+        }
+        return val;
     }
 
     return (
@@ -195,63 +389,6 @@ function Slider (props) {
 export default Slider;
 ```
 
-This is the jsx code for the Slider component. At the beginning, we initialize the correct data types from the props object.
+A lot has changed here, a createEffect handles to reactive `value` prop wich controlls the Slider position when set to a Signal. Note, the `Min` and `Max` Sliders have the `min` and `max` properties inverted. 
 
-`onMount` is called once, when the component was created, here we can get the current size of the Slider and initialize the button position. The next function calculates the value from the button position. `getPercentValue` returns the current value in percent (0-1). The `getBtnPercentValue` returns the percent value of the button relative to the slider track. Also a `resize` event listener is added on mount. The listener function is called when the browser window gets resized. `onCleanup` the event listener is removed.
-
-In the `sliderMove` function, the value is calculated from the current button position, and the button.style.top css property is updated when the mouse moves. The `sliderDown` and `sliderUp` handle the creation and removing of the Mouse Event Listeners.
-
-Finally, the Slider is used inside the App.jsx file:
-
-`App.jsx`:
-```jsx
-import { createSignal } from "solid-js";
-import Slider from "./components/Slider";
-
-function App() {
-  const [sliderValue, setSliderValue] = createSignal(0);
-
-  function sliderChange (val, track, btn) {
-      setSliderValue(val);
-  }
-  function sliderChangeEnd (val, track, btn) {
-      console.log("Slider released at " + val);
-  }
-
-  return (
-    <div class="main">
-        <h2>SolidJS Slider Component</h2>
-        <Slider minValue={0}
-                maxValue={100}
-                offset={2}
-                step={1}
-                onChange={sliderChange}
-                onChangeEnd={sliderChangeEnd} 
-        />
-        <p class="output">{sliderValue().toFixed(2)}</p>
-    </div>
-  )
-}
-
-export default App;
-```
-
-Finally remove the default demo styles from the index.jsx file:
-
-```jsx
-/* @refresh reload */
-import { render } from 'solid-js/web'
-import App from './App'
-
-const root = document.getElementById('root')
-render(() => <App />, root)
-``` 
-
-To run the example:
-```
-npm run dev
-```
-
-Open a web browser and navigate to the url from the Terminal output: http://localhost:5173
-
-
+There are still some problems with the `value`. Sometimes it is something like `10.000000012999` but this can be fixed with `Math.round` or `Number.toFixed` when the value is used or displayed. I wanted to see the internal value wich are set on the Demo Slider.

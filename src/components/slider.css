@@ -1,48 +1,36 @@
 
 .ui_slider {
     width: 100%;
-    height: 24px;
+    height: 18px;
     position: relative;
 }
 
-.output {
-    font-size: 16px;
-    color: #333;
-    text-align: right;
-    margin-right: 12px;
-}
-
 .ui_slider_track {
-    box-sizing: border-box;
-    background: #dfdfdf;
-    border: 1px solid #666;
-    height: 18px;
+    background: #EEE;
+    border: 1px solid #AAA;
+    height: 20px;
     width: 100%;
-    border-radius: 9px;
-    padding: 2px;
+    border-radius: 10px;
+    padding: 0px;
 }
 
 .ui_slider_button {
-    box-sizing: border-box;
-    outline: none;
+    /*outline: none;*/
     border: none;
     background-color: #44F;
     display: block;
     position: absolute;
-    left: 2px;
+    left: 0px;
     top: 2px;
-    height: 14px;
+    height: 16px;
+    width: 48px;
+    border-radius: 8px;
     font-size: 8px;
-    width: 32px;
-    border-radius: 6px;
 }
 
 @media (prefers-color-scheme: dark) {
-    .ui_slider p {
-        color: #DDD;
-    }
     .ui_slider_track {
-        background: #222;
+        background: #282828;
         border: 1px solid #1c1c1c;
     }
 }
