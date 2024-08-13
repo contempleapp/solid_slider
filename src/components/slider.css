@@ -26,9 +26,16 @@
     font-size: 8px;
 }
 
+.ui_slider_button:focus-visible {
+    border: 2px solid #000;
+}
+
 @media (prefers-color-scheme: dark) {
     .ui_slider_track {
         background: #282828;
         border: 1px solid #1c1c1c;
+    }
+    .ui_slider_button:focus-visible {
+        border: 2px solid #FFF;
     }
 }
