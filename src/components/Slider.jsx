@@ -59,7 +59,7 @@ function Slider (props) {
         window.removeEventListener("mouseup", sliderUp);
         window.removeEventListener("mousemove", sliderMove);
         if(typeof props.onEnd === "function") 
-            props.onEnd(sliderPos.value, track, btn);
+            props.onEnd(sliderPos, track, btn);
     }
 
     function sliderMove (event) {
