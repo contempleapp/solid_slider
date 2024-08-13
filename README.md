@@ -90,6 +90,7 @@ Here are some general styles and also a unique styling for the demo slider: `dem
 
 I created a new example project with a lot of Sliders to test the features
 
+`App.jsx`:
 ```jsx
 import { createSignal } from "solid-js";
 import Slider from "./components/Slider";
