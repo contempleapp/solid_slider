@@ -10,8 +10,10 @@ The first version of the slider had various problems and should not be used to l
 - The props are now initialized in every function when needed. This makes the component props reactive with Signals.
 - There were problems with the value calculation, and resize handling
 - Renamed `minValue` and `maxValue` to `min` and `max`, `onChangeEnd` to `onEnd` and added a `onStart` callback function
+- Added a kbdStep prop for Keyboard control when the slider has keyboard foces
 - I also added a global `index.css` file for styling and changed some of the style sheets
-
+  
+`index.css`:
 ```css
 body {
 	background: #CFCFCF;
@@ -229,7 +231,6 @@ Here are a few Sliders wich control the Demo Slider.
 }
 
 .ui_slider_button {
-    outline: none;
     border: none;
     background-color: #44F;
     display: block;
@@ -242,10 +243,17 @@ Here are a few Sliders wich control the Demo Slider.
     font-size: 8px;
 }
 
+.ui_slider_button:focus-visible {
+    border: 2px solid #000;
+}
+
 @media (prefers-color-scheme: dark) {
     .ui_slider_track {
         background: #282828;
         border: 1px solid #1c1c1c;
+    }
+    .ui_slider_button:focus-visible {
+        border: 2px solid #FFF;
     }
 }
 ```
@@ -262,6 +270,7 @@ import "./slider.css";
  * max: Number
  * step: Number
  * offset: Number
+ * kbdStep: Number
  * value: Number
  * onChange: Function( currentValue, track_ref, button_ref)
  * onStart: Function( currentValue, track_ref, button_ref )
@@ -313,7 +322,7 @@ function Slider (props) {
         window.removeEventListener("mouseup", sliderUp);
         window.removeEventListener("mousemove", sliderMove);
         if(typeof props.onEnd === "function") 
-            props.onEnd(sliderPos.value, track, btn);
+            props.onEnd(sliderPos, track, btn);
     }
 
     function sliderMove (event) {
@@ -352,6 +361,13 @@ function Slider (props) {
         if(typeof props.onStart === "function") 
             props.onStart(sliderPos, track, btn);
     }
+    
+    function kbdDown (event) {
+        if(event.key === "ArrowLeft") 
+            updateValue( sliderPos.value - (typeof props.kbdStep === "number" ? props.kbdStep : 1));
+        else if(event.key === "ArrowRight") 
+            updateValue( sliderPos.value + (typeof props.kbdStep === "number" ? props.kbdStep : 1) );
+    }
 
     function updateValue (val) {
         const min = props.min || 0;
@@ -361,9 +377,7 @@ function Slider (props) {
         const size = track.clientWidth - (btn.clientWidth + (offset * 2));
         const percent = getPercentValue(val);
         sliderPos.value = val;
-
         btn.style.left = (size * percent + offset) + "px";
-
         if(typeof props.onChange === "function")
             props.onChange(sliderPos, track, btn);
     }
@@ -382,7 +396,7 @@ function Slider (props) {
     return (
         <div class={"ui_slider" + (props.cssClass ? " " + props.cssClass : "")}>
             <div ref={track} class="ui_slider_track"></div>
-            <button ref={btn} class="ui_slider_button" onMouseDown={sliderDown}></button>
+            <button ref={btn} class="ui_slider_button" onMouseDown={sliderDown} onKeyDown={kbdDown}></button>
         </div>
     );
 }
