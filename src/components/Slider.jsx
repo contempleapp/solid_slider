@@ -8,6 +8,7 @@ import "./slider.css";
  * max: Number
  * step: Number
  * offset: Number
+ * kbdStep: Number
  * value: Number
  * onChange: Function( currentValue, track_ref, button_ref)
  * onStart: Function( currentValue, track_ref, button_ref )
@@ -98,6 +99,13 @@ function Slider (props) {
         if(typeof props.onStart === "function") 
             props.onStart(sliderPos, track, btn);
     }
+    
+    function kbdDown (event) {
+        if(event.key === "ArrowLeft") 
+            updateValue( sliderPos.value - (typeof props.kbdStep === "number" ? props.kbdStep : 1));
+        else if(event.key === "ArrowRight") 
+            updateValue( sliderPos.value + (typeof props.kbdStep === "number" ? props.kbdStep : 1) );
+    }
 
     function updateValue (val) {
         const min = props.min || 0;
@@ -126,7 +134,7 @@ function Slider (props) {
     return (
         <div class={"ui_slider" + (props.cssClass ? " " + props.cssClass : "")}>
             <div ref={track} class="ui_slider_track"></div>
-            <button ref={btn} class="ui_slider_button" onMouseDown={sliderDown}></button>
+            <button ref={btn} class="ui_slider_button" onMouseDown={sliderDown} onKeyDown={kbdDown}></button>
         </div>
     );
 }
