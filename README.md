@@ -3,7 +3,7 @@
 
 #### PART TWO
 
-The first version of the slider had various problems and should not be used to learn SolidJS. Since i'am also just learning SolidJS, i didn't notice the problems with the Slider in my app, but there are problems with the reactive props. Also some problems with the `step`, `offset` and `value` props. I should have tested the component better before writing a tutorial about SolidJS. I apologize.
+The first version of the slider had various problems and should not be used to learn SolidJS. Since i'am also just learning SolidJS, i didn't notice the problems with the Slider in my app, but there are problems with the reactive props. Also some problems with the `step`, `offset` and `value` props. I should have tested the component better before writing a tutorial about SolidJS. I apologize. &#x273B;
 
 #### Here you find an updated verison of the slider:
 
