@@ -1,5 +1,5 @@
 
-## &#x21f0; This Slider is outdated, also check out the [part_two](https://github.com/contempleapp/solid_slider/tree/part_two) and [part_three](https://github.com/contempleapp/solid_slider/blob/part_three/README.md) of this tutorial
+### &#x21f0; This Slider is outdated, also check out [part_two](https://github.com/contempleapp/solid_slider/tree/part_two) and [part_three](https://github.com/contempleapp/solid_slider/blob/part_three/README.md) of this tutorial
 
 Install the latest version with
 ```
