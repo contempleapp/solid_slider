@@ -36,6 +36,7 @@ body, div, button, p, span {
 .demo_slider {
 	margin-bottom: 32px;
 }
+
 .demo_slider .ui_slider_track {
 	background: #ccffcc;
 	border: 2px solid #141;
@@ -43,6 +44,7 @@ body, div, button, p, span {
 	height: 38px;
 	padding: 0px;
 }
+
 .demo_slider .ui_slider_button {
 	background: #252;
 	width: 20px;

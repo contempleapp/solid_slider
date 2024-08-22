@@ -1,4 +1,5 @@
-import { onMount, onCleanup, createEffect } from "solid-js";
+import { onMount, onCleanup, createEffect, 
+         getOwner, runWithOwner } from "solid-js";
 import "./slider.css";
 /** 
  * Props:
@@ -16,6 +17,7 @@ import "./slider.css";
  * *** Note: currentValue is an object with the 'value' property
  */
 function Slider (props) {
+    const owner = getOwner();
     const sliderPos = { clickPos: 0, btnStartPos: 0, value: 0 };
     let btn, track;
 
@@ -36,10 +38,12 @@ function Slider (props) {
     });
 
     function resize (e) {
-        const offset = props.offset || 0;
-        const size = track.clientWidth - (btn.clientWidth + (offset * 2));
-        const percent = getPercentValue(sliderPos.value);
-        btn.style.left = (size * percent + offset) + "px";
+        runWithOwner(owner, () => {
+            const offset = props.offset || 0;
+            const size = track.clientWidth - (btn.clientWidth + (offset * 2));
+            const percent = getPercentValue(sliderPos.value);
+            btn.style.left = (size * percent + offset) + "px";
+        });
     }
 
     function getPercentValue (v) {
@@ -57,54 +61,63 @@ function Slider (props) {
     }
 
     function sliderUp (event) {
-        window.removeEventListener("mouseup", sliderUp);
-        window.removeEventListener("mousemove", sliderMove);
-        if(typeof props.onEnd === "function") 
-            props.onEnd(sliderPos, track, btn);
+        runWithOwner(owner, () => {
+            window.removeEventListener("mouseup", sliderUp);
+            window.removeEventListener("mousemove", sliderMove);
+            if(typeof props.onEnd === "function") 
+                props.onEnd(sliderPos, track, btn);
+        });
     }
 
     function sliderMove (event) {
-        const dx = Number(event.clientX) - sliderPos.clickPos;
-        const step = props.step || 0;
-        const offset = props.offset || 0;
-        const min = props.min || 0;
-        const max = typeof props.max == "number" ? props.max : 100;
-        const size = track.clientWidth - (btn.clientWidth + (offset * 2));
-        let pos = Math.round(dx) + sliderPos.btnStartPos;
-        
-        if(pos < offset) pos = offset;
-        else if(pos > size + offset) pos = size + offset;
-        else if(step !== 0) {
-            const vs = (size/ (max - min)) * step;
-            pos = Math.round((pos - offset*2) / vs) * vs + offset;
+        runWithOwner(owner, () => {
+            const dx = Number(event.clientX) - sliderPos.clickPos;
+            const step = props.step || 0;
+            const offset = props.offset || 0;
+            const min = props.min || 0;
+            const max = typeof props.max == "number" ? props.max : 100;
+            const size = track.clientWidth - (btn.clientWidth + (offset * 2));
+            let pos = Math.round(dx) + sliderPos.btnStartPos;
+            
             if(pos < offset) pos = offset;
             else if(pos > size + offset) pos = size + offset;
-        }
+            else if(step !== 0) {
+                const vs = (size/ (max - min)) * step;
+                pos = Math.round((pos - offset*2) / vs) * vs + offset;
+                if(pos < offset) pos = offset;
+                else if(pos > size + offset) pos = size + offset;
+            }
 
-        btn.style.left = pos + "px";
+            btn.style.left = pos + "px";
 
-        const percent = getBtnPercentValue(pos);
-        const newval = (max - min) * percent + min;
-        sliderPos.value = newval;
-        
-        if(typeof props.onChange === "function") 
-            props.onChange(sliderPos, track, btn);
+            const percent = getBtnPercentValue(pos);
+            const newval = (max - min) * percent + min;
+            sliderPos.value = newval;
+            
+            if(typeof props.onChange === "function") 
+                props.onChange(sliderPos, track, btn);
+        });
     }
 
     function sliderDown (event) {
-        window.addEventListener("mouseup", sliderUp);
-        window.addEventListener("mousemove", sliderMove);
-        sliderPos.clickPos = Number(event.clientX);
-        sliderPos.btnStartPos = parseInt(btn.style.left) || 0;
-        if(typeof props.onStart === "function") 
-            props.onStart(sliderPos, track, btn);
+        runWithOwner(owner, () => {
+            console.log("Down: " + props.onChange + ", min: " + props.min + ", max: " + props.max);
+            window.addEventListener("mouseup", sliderUp);
+            window.addEventListener("mousemove", sliderMove);
+            sliderPos.clickPos = Number(event.clientX);
+            sliderPos.btnStartPos = parseInt(btn.style.left) || 0;
+            if(typeof props.onStart === "function") 
+                props.onStart(sliderPos, track, btn);
+        });
     }
     
     function kbdDown (event) {
-        if(event.key === "ArrowLeft") 
-            updateValue( sliderPos.value - (typeof props.kbdStep === "number" ? props.kbdStep : 1));
-        else if(event.key === "ArrowRight") 
-            updateValue( sliderPos.value + (typeof props.kbdStep === "number" ? props.kbdStep : 1) );
+        runWithOwner(owner, () => {
+            if(event.key === "ArrowLeft") 
+                updateValue( sliderPos.value - (typeof props.kbdStep === "number" ? props.kbdStep : 1));
+            else if(event.key === "ArrowRight") 
+                updateValue( sliderPos.value + (typeof props.kbdStep === "number" ? props.kbdStep : 1) );
+        });
     }
 
     function updateValue (val) {
@@ -121,7 +134,7 @@ function Slider (props) {
     }
 
     function inRange (min, max, val) {
-        if( max > min) {
+        if(max > min) {
             if(val < min) val = min;
             else if(val > max) val = max;
         }else{
