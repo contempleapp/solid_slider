@@ -118,7 +118,6 @@ function Slider (props) {
 
     function sliderDown (event) {
         runWithOwner(owner, () => {
-            console.log("Down: " + props.onChange + ", min: " + props.min + ", max: " + props.max);
             window.addEventListener("mouseup", sliderUp);
             window.addEventListener("mousemove", sliderMove);
             sliderPos.clickPos = Number(event.clientX);
