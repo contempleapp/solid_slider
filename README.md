@@ -4,12 +4,14 @@
 #### PART THREE
 
 Initially i've developed my own Slider because of the warning `computations created outside a 'createRoot' or 'render' will never be disposed`. I used the Slider component from [kobalte.dev](https://kobalte.dev). But on click and drag the warning fired on every mouse move. I couldn't find a lot of information about the warning, so i've developed my own Slider
-to find out more. The first version of my slider then worked without the warning, but was not reactive anymore. The second version of the Slider (PART TWO) is reactive but the warning is back when i implement it inside my [tauri.app](https://tauri.app) app, but not in the example code for PART TWO. I'am still not sure how to handle the warning properly and where the problem comes from inside my app. 
+to find out more.
+
+The first version of the slider then worked without the warning, but was not reactive anymore. The second version of the Slider (part_two) is reactive but the warning is back when i implement it inside my [tauri.app](https://tauri.app) app, but the warning does not appear in the example for part_two. I'am still not sure how to handle the warning properly and where the problem comes from inside my app.
 
 
 #### Fixing the warning within the Slider:
 
-In order to fix the warning, i've used `getOwner` and `runWithOwner` from SolidJS inside every click handler:
+In order to fix the warning, i've used `getOwner` and `runWithOwner` from SolidJS inside every click and resize handler:
 
 `Slider.jsx`:
 ```jsx
@@ -168,13 +170,13 @@ function Slider (props) {
 }
 export default Slider;
 ```
-At the beginning, the `owner` stored in a const.
+At the beginning, the `owner` is stored in a const.
 
 ```jsx
 const owner = getOwner();
 ``` 
 
-And then inside click and move handlers is run with the owner
+And then inside the click and move handlers, is run with the owner
 ```jsx
 function sliderMove (event) {
     runWithOwner(owner, () => {
@@ -183,4 +185,6 @@ function sliderMove (event) {
 }
 ```
 
-I don't know if that's the best way to fix the problem. May be the problem is also somewhere inside my app with async and reactivity. But at least the reactive version of the Slider is now working without any warning
+I don't know if that's the best way to fix the problem. May be the problem is somewhere inside my app with async loading from rust and reactivity.
+
+But at least the reactive version of the Slider is now working without any warning
