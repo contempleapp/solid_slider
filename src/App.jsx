@@ -8,8 +8,8 @@ function App() {
   const [sliderMinValue, setSliderMinValue] = createSignal(0);
   const [sliderMaxValue, setSliderMaxValue] = createSignal(100);
   const [sliderOffsetValue, setSliderOffsetValue] = createSignal(0);
-  const [sliderStepValue, setSliderStepValue] = createSignal(0);
-  let theSlider, linkSlider, minSlider, maxSlider, offsetSlider, stepSlider;
+  const [sliderStepValue, setSliderStepValue] = createSignal(1);
+  let demoSlider, linkSlider, minSlider, maxSlider, offsetSlider, stepSlider;
 
   function sliderChange (val, track, btn) {
       setSliderValue(val.value);
@@ -23,19 +23,7 @@ function App() {
   function slider2Change (val, track, btn) {
       setSlider2Value(val.value);
   }
-  function sliderMinChange (val, track, btn) {
-     setSliderMinValue(val.value);
-  }
-  function sliderMaxChange (val, track, btn) {
-     setSliderMaxValue(val.value);
-  }
-  function sliderOffsetChange (val, track, btn) {
-     setSliderOffsetValue(val.value);
-  }
-  function sliderStepChange (val, track, btn) {
-     setSliderStepValue(val.value);
-  }
-  const setButtonValue = () => {
+  function setButtonValue () {
       setSliderValue(43);
   }
 
@@ -49,7 +37,7 @@ function App() {
                 min={250}
                 max={-250}
                 step={10}
-                onChange={sliderMinChange}
+                onChange={(val) => setSliderMinValue(val.value)}
         />
         <p class="output">{sliderMinValue()}</p>
 
@@ -59,7 +47,7 @@ function App() {
                 min={-250}
                 max={250}
                 step={10}
-                onChange={sliderMaxChange}
+                onChange={(val) => setSliderMaxValue(val.value)}
         />
         <p class="output">{sliderMaxValue()}</p>
 
@@ -67,9 +55,9 @@ function App() {
         <Slider ref={offsetSlider}
                 defaultValue={sliderOffsetValue()}
                 min={0}
-                max={25}
+                max={50}
                 step={1}
-                onChange={sliderOffsetChange}
+                onChange={(val) => setSliderOffsetValue(val.value)}
         />
         <p class="output">{sliderOffsetValue()}</p>
 
@@ -77,15 +65,15 @@ function App() {
         <Slider ref={stepSlider}
                 defaultValue={sliderStepValue()}
                 min={0}
-                max={25}
-                step={1}
-                onChange={sliderStepChange}
+                max={2.5}
+                step={0.001}
+                onChange={(val) => setSliderStepValue(val.value)}
         />
         <p class="output">{sliderStepValue()}</p>
 
         <div class="demo_slider_wrap">
             <label class="slider_label">Demo Slider:</label>
-            <Slider ref={theSlider}
+            <Slider ref={demoSlider}
                     cssClass="demo_slider"
                     defaultValue={sliderValue()}
                     min={sliderMinValue()}
@@ -96,7 +84,7 @@ function App() {
                     onStart={sliderStart} 
                     onEnd={sliderEnd} 
             />
-            <p class="output">{sliderValue().toFixed(4)}</p>
+            <p class="output">{sliderValue()}</p>
           </div>
 
         <label class="slider_label">Linked Slider:</label>
