@@ -40,16 +40,17 @@ function Slider (props) {
 
     onMount(() => {
         const offset = props.offset || 0;
-        const size = track.clientWidth - (btn.clientWidth + (offset * 2));
-        const percent = getPercentValue(props.defaultValue || 0);
-        sliderPos.value = props.defaultValue || 0;
-        btn.style.left = ((size * percent) + offset) + "px";
+        const size = track.clientWidth - (btn.clientWidth + offset * 2);
+        const defVal = parseFloat(props.defaultValue || 0);
+        const percent = getPercentValue(defVal);
+        sliderPos.value = defVal;
+        btn.style.left = (size * percent + offset) + "px";
         window.addEventListener("resize", resize);
     });
     onCleanup(() => window.removeEventListener("resize", resize));
 
     createEffect(() => {
-        if(typeof props.value !== "undefined" && props.value !== sliderPos.value) {
+        if( typeof props.value !== "undefined" && props.value !== sliderPos.value) {
             updateValue(props.value);
         }
     });
@@ -57,7 +58,7 @@ function Slider (props) {
     function resize (e) {
         runWithOwner(owner, () => {
             const offset = props.offset || 0;
-            const size = track.clientWidth - (btn.clientWidth + (offset * 2));
+            const size = track.clientWidth - (btn.clientWidth + offset * 2);
             const percent = getPercentValue(sliderPos.value);
             btn.style.left = (size * percent + offset) + "px";
         });
@@ -66,15 +67,15 @@ function Slider (props) {
     function getPercentValue (v) {
         const min = props.min || 0;
         const max = typeof props.max == "number" ? props.max : 100;
-        const val = inRange(min, max, parseFloat(v));
+        const val = inRange(min, max, v);
         if(max > min) return (val-min)/(max-min);
         else return 1 - ((val-max) / (min-max));
     }
 
-    function getBtnPercentValue (btn_pos) {
+    function getBtnPercentValue (pos) {
         const offset = props.offset || 0;
-        const size = track.clientWidth - (btn.clientWidth + (offset * 2));
-        return (btn_pos - offset) / size;
+        const size = track.clientWidth - (btn.clientWidth + offset * 2);
+        return (pos - offset) / size;
     }
 
     function sliderUp (event) {
@@ -93,13 +94,13 @@ function Slider (props) {
             const offset = props.offset || 0;
             const min = props.min || 0;
             const max = typeof props.max == "number" ? props.max : 100;
-            const size = track.clientWidth - (btn.clientWidth + (offset * 2));
+            const size = track.clientWidth - (btn.clientWidth + offset * 2);
             let pos = Math.round(dx) + sliderPos.btnStartPos;
             
             if(pos < offset) pos = offset;
             else if(pos > size + offset) pos = size + offset;
             else if(step !== 0) {
-                const vs = (size/ (max - min)) * step;
+                const vs = (size / (max - min)) * step;
                 pos = Math.round((pos - offset*2) / vs) * vs + offset;
                 if(pos < offset) pos = offset;
                 else if(pos > size + offset) pos = size + offset;
@@ -108,7 +109,19 @@ function Slider (props) {
             btn.style.left = pos + "px";
 
             const percent = getBtnPercentValue(pos);
-            const newval = (max - min) * percent + min;
+            let newval = (max - min) * percent + min;
+            if(step !== 0) {
+                const r = step - parseInt(step);
+                if(r === 0) {
+                    newval = Math.round(newval);
+                }else{
+                    const ir = 1/r;
+                    newval = Math.round(newval * ir) / ir;
+                    if(newval > max) newval = max;
+                    else if(newval < min) newval = min;
+                }
+            }
+
             sliderPos.value = newval;
             
             if(typeof props.onChange === "function") 
@@ -129,10 +142,12 @@ function Slider (props) {
     
     function kbdDown (event) {
         runWithOwner(owner, () => {
+            const min = props.min || 0;
+            const max = typeof props.max == "number" ? props.max : 100;
             if(event.key === "ArrowLeft") 
-                updateValue( sliderPos.value - (typeof props.kbdStep === "number" ? props.kbdStep : 1));
+                updateValue( sliderPos.value - (props.kbdStep || (max-min)/100) );
             else if(event.key === "ArrowRight") 
-                updateValue( sliderPos.value + (typeof props.kbdStep === "number" ? props.kbdStep : 1) );
+                updateValue( sliderPos.value + (props.kbdStep || (max-min)/100) );
         });
     }
 
@@ -140,8 +155,8 @@ function Slider (props) {
         const min = props.min || 0;
         const max = typeof props.max == "number" ? props.max : 100;
         const offset = typeof props.offset === "number" ? props.offset : 0;
-        val = inRange(min, max, val)
-        const size = track.clientWidth - (btn.clientWidth + (offset * 2));
+        val = inRange(min, max, parseFloat(val));
+        const size = track.clientWidth - (btn.clientWidth + offset * 2);
         const percent = getPercentValue(val);
         sliderPos.value = val;
         btn.style.left = (size * percent + offset) + "px";
@@ -187,3 +202,114 @@ function sliderMove (event) {
 I don't know if that's the best way to fix the problem. May be the problem is somewhere inside my app with async loading from rust and reactivity.
 
 But at least the reactive version of the Slider is now working without any warning
+
+I've also updated the `sliderMove` handler to fix some bugs with the step prop
+and cleaned up some code
+
+```jsx
+import { createSignal } from "solid-js";
+import Slider from "./components/Slider";
+import "./index.css";
+
+function App() {
+  const [sliderValue, setSliderValue] = createSignal(50);
+  const [slider2Value, setSlider2Value] = createSignal(50);
+  const [sliderMinValue, setSliderMinValue] = createSignal(0);
+  const [sliderMaxValue, setSliderMaxValue] = createSignal(100);
+  const [sliderOffsetValue, setSliderOffsetValue] = createSignal(0);
+  const [sliderStepValue, setSliderStepValue] = createSignal(1);
+  let demoSlider, linkSlider, minSlider, maxSlider, offsetSlider, stepSlider;
+
+  function sliderChange (val, track, btn) {
+      setSliderValue(val.value);
+  }
+  function sliderStart (val, track, btn) {
+      console.log("Slider clicked at " + val.value);
+  }
+  function sliderEnd (val, track, btn) {
+      console.log("Slider released at " + val.value);
+  }
+  function slider2Change (val, track, btn) {
+      setSlider2Value(val.value);
+  }
+  function setButtonValue () {
+      setSliderValue(43);
+  }
+
+  return (
+    <div class="main">
+        <h2>SolidJS Slider Component</h2>
+        <label class="slider_label">Min:</label>
+        <Slider ref={minSlider}
+                defaultValue={sliderMinValue()}
+                min={250}
+                max={-250}
+                step={10}
+                onChange={(val) => setSliderMinValue(val.value)}
+        />
+        <p class="output">{sliderMinValue()}</p>
+
+        <label class="slider_label">Max:</label>
+        <Slider ref={maxSlider}
+                defaultValue={sliderMaxValue()}
+                min={-250}
+                max={250}
+                step={10}
+                onChange={(val) => setSliderMaxValue(val.value)}
+        />
+        <p class="output">{sliderMaxValue()}</p>
+
+        <label class="slider_label">Offset:</label>
+        <Slider ref={offsetSlider}
+                defaultValue={sliderOffsetValue()}
+                min={0}
+                max={50}
+                step={1}
+                onChange={(val) => setSliderOffsetValue(val.value)}
+        />
+        <p class="output">{sliderOffsetValue()}</p>
+
+        <label class="slider_label">Step:</label>
+        <Slider ref={stepSlider}
+                defaultValue={sliderStepValue()}
+                min={0}
+                max={2.5}
+                step={0.001}
+                onChange={(val) => setSliderStepValue(val.value)}
+        />
+        <p class="output">{sliderStepValue()}</p>
+
+        <div class="demo_slider_wrap">
+            <label class="slider_label">Demo Slider:</label>
+            <Slider ref={demoSlider}
+                    cssClass="demo_slider"
+                    defaultValue={sliderValue()}
+                    min={sliderMinValue()}
+                    max={sliderMaxValue()}
+                    offset={sliderOffsetValue()}
+                    step={sliderStepValue()}
+                    onChange={sliderChange}
+                    onStart={sliderStart} 
+                    onEnd={sliderEnd} 
+            />
+            <p class="output">{sliderValue()}</p>
+          </div>
+
+        <label class="slider_label">Linked Slider:</label>
+        <Slider ref={linkSlider}
+                min={sliderMinValue()}
+                max={sliderMaxValue()}
+                offset={sliderOffsetValue()}
+                step={sliderStepValue()}
+                value={sliderValue()}
+                onChange={slider2Change}
+        />
+        <p class="output">{slider2Value().toFixed(4)}</p>
+        <button onClick={setButtonValue}>Set Slider Value To 43</button>
+    </div>
+  )
+}
+
+export default App;
+```
+
